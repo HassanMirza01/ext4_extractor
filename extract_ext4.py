@@ -24,7 +24,7 @@ class ExtractExt4():
     def scan_dir(root_inode, root_path=""):
       for entry_name, entry_inode_idx, entry_type in root_inode.open_dir():
         # exclude '.', '..'
-        if entry_name in ['.', '..']:
+        if entry_name in ['.', '..', 'lost+found']:
           continue
 
         entry_inode = root_inode.volume.get_inode(entry_inode_idx, entry_type)
