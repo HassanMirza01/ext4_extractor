@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import subprocess
 import sys
 import ext4
 
@@ -112,25 +113,38 @@ class ReadExt4():
     self.__appendf('\n'.join(self.fs_config), self.fs_config_file)
 
   def __write_fetures(self):
-    with open(self.image_name, 'rb') as file:
-      self.fetures.append('Filesystem volume name:'+' '*4 +
-                          ext4.Volume(file).superblock.s_volume_name.decode())
-      self.fetures.append('Last mounted on:'+' '*11 +
-                          ext4.Volume(file).superblock.s_last_mounted.decode())
-      self.fetures.append('Filesystem UUID:'+' '*11 +
-                          ext4.Volume(file).uuid.lower())
-      self.fetures.append('Filesystem magic number:   ' +
-                          hex(ext4.Volume(file).superblock.s_magic))
-      self.fetures.append('Inode count:'+' '*15 +
-                          str(ext4.Volume(file).superblock.s_inodes_count))
-      self.fetures.append('Block size:'+' '*16 +
-                          str(ext4.Volume(file).block_size))
-      self.fetures.append('Inode size:'+' '*16 +
-                          str(ext4.Volume(file).superblock.s_inode_size))
-      self.fetures.append('Inodes per group:'+' '*10 +
-                          str(ext4.Volume(file).superblock.s_inodes_per_group))
-      # write to file
-      self.__appendf('\n'.join(self.fetures), self.file_features)
+    if os.name == 'posix':
+      cmd = ['tune2fs', '-l', self.image_name]
+      p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                           stderr=subprocess.STDOUT, universal_newlines=True)
+      output, _ = p.communicate()
+
+      with open(self.file_features, 'w') as file:
+        for line in output:
+          file.write(line)
+        file.write('Partition size: {}'.format(
+          os.stat(self.image_name).st_size))
+
+    else:
+      with open(self.image_name, 'rb') as file:
+        self.fetures.append('Filesystem volume name:'+' '*4 +
+                            ext4.Volume(file).superblock.s_volume_name.decode())
+        self.fetures.append('Last mounted on:'+' '*11 +
+                            ext4.Volume(file).superblock.s_last_mounted.decode())
+        self.fetures.append('Filesystem UUID:'+' '*11 +
+                            ext4.Volume(file).uuid.lower())
+        self.fetures.append('Filesystem magic number:   ' +
+                            hex(ext4.Volume(file).superblock.s_magic))
+        self.fetures.append('Inode count:'+' '*15 +
+                            str(ext4.Volume(file).superblock.s_inodes_count))
+        self.fetures.append('Block size:'+' '*16 +
+                            str(ext4.Volume(file).block_size))
+        self.fetures.append('Inode size:'+' '*16 +
+                            str(ext4.Volume(file).superblock.s_inode_size))
+        self.fetures.append('Inodes per group:'+' '*10 +
+                            str(ext4.Volume(file).superblock.s_inodes_per_group))
+        # write to file
+        self.__appendf('\n'.join(self.fetures), self.file_features)
 
   def read_ext4(self):
     def scan_dir(root_inode, root_path=""):
