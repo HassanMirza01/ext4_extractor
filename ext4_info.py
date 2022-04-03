@@ -79,14 +79,21 @@ class ReadExt4():
     """
     write context from fs_context list to file
     """
-    if self.file_name == 'system' or self.file_name == 'product' or self.file_name == 'system_ext':
-      self.fs_context.append('/ u:object_r:system_file:s0')
-      self.fs_context.append(
-        f'/{self.file_name}(/.*)? u:object_r:system_file:s0')
-    elif self.file_name == 'vendor' or self.file_name == 'odm':
+    if self.file_name == 'vendor' or self.file_name == 'odm':
       self.fs_context.append('/ u:object_r:vendor_file:s0')
       self.fs_context.append(
         f'/{self.file_name}(/.*)? u:object_r:vendor_file:s0')
+    
+    else:
+      self.fs_context.append('/ u:object_r:system_file:s0')
+      self.fs_context.append(
+        f'/{self.file_name}(/.*)? u:object_r:system_file:s0')
+
+    if self.file_name == 'system':
+      self.fs_context.append(f'/lost+found        u:object_r:rootfs:s0')
+    else:
+      self.fs_context.append(
+        f'/{self.file_name}/lost+found        u:object_r:rootfs:s0')
 
     # replace . with \. in list
     self.fs_context = [ele.replace('.', r'\.') for ele in self.fs_context]
@@ -100,13 +107,13 @@ class ReadExt4():
     """
     write config from fs_config list to file
     """
-    if self.file_name == 'system' or self.file_name == 'product' or self.file_name == 'system_ext' or self.file_name == 'odm':
-      self.fs_config.append('/ 0 0 0755')
-      self.fs_config.append(f'{self.file_name} 0 0 0755')
-
-    elif self.file_name == 'vendor':
+    if self.file_name == 'vendor':
       self.fs_config.append('/ 0 2000 0755')
       self.fs_config.append(f'{self.file_name} 0 2000 0755')
+    
+    else:
+      self.fs_config.append('/ 0 0 0755')
+      self.fs_config.append(f'{self.file_name} 0 0 0755')
 
     self.fs_config.sort()
     # write config list to file
