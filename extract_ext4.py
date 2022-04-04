@@ -7,7 +7,7 @@ import ext4
 
 
 class ExtractExt4():
-  def __init__(self) -> None:
+  def __init__(self):
     self.image_name = os.path.realpath(sys.argv[1])
     self.file_name = self.__file_name(os.path.basename(self.image_name))
     self.out_dir = os.path.realpath(sys.argv[2])

@@ -8,7 +8,7 @@ import ext4
 
 
 class ReadExt4():
-  def __init__(self) -> None:
+  def __init__(self):
     self.image_name = os.path.realpath(sys.argv[1])
     self.out_dir = os.path.realpath(sys.argv[2])
     self.fs_context = []
@@ -210,7 +210,7 @@ class ReadExt4():
 
 
 class FsFetures():
-  def __init__(self) -> None:
+  def __init__(self):
     pass
 
 
